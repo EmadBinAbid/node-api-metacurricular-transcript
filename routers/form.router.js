@@ -15,7 +15,7 @@ const FormModel = formModel.FormModel;
 method: addForm(expressInstance)
 url: domain/form
 request object: expects an object of type { "form": Object }
-response object: 
+response object: sends an object of type { "form": Object } if it doesn't exist earlier.
 */
 addForm = function(expressInstance)
 {
@@ -50,8 +50,72 @@ addForm = function(expressInstance)
     });
 }
 
+/*
+method: getFormById(expressInstance, jwtInstance, verifyToken)
+url: domain/form?studentId
+request object: a query string with key=studentId
+response object: sends an object of type { "form": Object }
+*/
+getFormById = function(expressInstance, jwtInstance, verifyToken)
+{
+    expressInstance.get('/form', verifyToken, (req, res) => {
+        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
+            if(err)
+            {
+                res.status(401).send("Unauthorized");
+            }
+            else
+            {
+                FormModel.findOne({ "studentId": req.query.studentId }, (err, formObject)=> {
+                    if(err)
+                    {
+                        res.status(400).send("Bad Request");
+                    }
+                    else
+                    {
+                        res.json({ "form": formObject });
+                    }
+                });
+            }
+        });
+    });
+}
+
+/*
+method: getAllForms(expressInstance, jwtInstance, verifyToken)
+url: domain/form/all-forms
+request object: none
+response object: sends an object of type { "form": Object }
+*/
+getAllForms = function(expressInstance, jwtInstance, verifyToken)
+{
+    expressInstance.get('/form/all-forms', verifyToken, (req, res) => {
+        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
+            if(err)
+            {
+                res.status(401).send("Unauthorized");
+            }
+            else
+            {
+                FormModel.find((err, formObject)=> {
+                    if(err)
+                    {
+                        res.status(400).send("Bad Request");
+                    }
+                    else
+                    {
+                        res.json({ "form": formObject });
+                    }
+                });
+            }
+        });
+    });
+}
+
 //CRUD operations at one place
 exports.createsRoutes = function(expressInstance, jwtInstance, verifyToken)
 {
     addForm(expressInstance);
+    getFormById(expressInstance, jwtInstance, verifyToken);
+    getAllForms(expressInstance, jwtInstance, verifyToken);
 }
