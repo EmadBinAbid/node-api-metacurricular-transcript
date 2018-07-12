@@ -9,6 +9,7 @@ const server = require('./server');
 const connection = require('./connection.mongoose');
 const authentication = require('./authentication.mongoose');
 const userRouter = require('./routers/user.router');
+const formRouter = require('./routers/form.router');
 
     //npm dependencies
 const express = require('express');
@@ -24,6 +25,7 @@ app.use(cors());            //To resolve cross-origin browser issues.
 
 //Creating routes
 userRouter.createRoutes(app, jwt, authentication.verifyToken);
+formRouter.createsRoutes(app, jwt, authentication.verifyToken);
 
 //Validating user
 authentication.validateUser(app, jwt);
