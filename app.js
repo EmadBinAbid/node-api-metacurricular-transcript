@@ -1,6 +1,6 @@
 /*
 @author: Emad Bin Abid
-@date: July 04, 2018
+@date: July 12, 2018
 */
 
 //Application dependencies
@@ -16,6 +16,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use(cors());            //To resolve cross-origin browser issues.
 
 //Creating routes
 userRouter.createRoutes(app, jwt, authentication.verifyToken);
-formRouter.createsRoutes(app, jwt, authentication.verifyToken);
+formRouter.createsRoutes(app, jwt, multer, authentication.verifyToken);
 
 //Validating user
 authentication.validateUser(app, jwt);

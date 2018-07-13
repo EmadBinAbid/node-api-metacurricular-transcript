@@ -12,16 +12,16 @@ const formModel = require('../models/form.model');
 const FormModel = formModel.FormModel;
 
 /*
-method: addForm(expressInstance)
+method: addForm(expressInstance, multerInstance)
 url: domain/form
-request object: expects an object of type { "form": Object }
+request object: expects an object of type Object
 response object: sends an object of type { "form": Object } if it doesn't exist earlier.
 */
-addForm = function(expressInstance)
+addForm = function(expressInstance, multerInstance)
 {
-    expressInstance.post('/form', (req, res) => {
+    expressInstance.post('/form', multerInstance(config.multerConfig).array('upload', 2), (req, res) => {
         //If form of particular studentId exists, then don't add the form.
-        FormModel.findOne( { "studentId": req.body.form.studentId }, (err, formObject)=>{
+        FormModel.findOne( { "studentId": req.body.studentId }, (err, formObject)=>{
             if(err)
             {
                 res.status(400).send("Bad Request");
@@ -30,7 +30,16 @@ addForm = function(expressInstance)
             {
                 if(formObject === null)
                 {
-                    FormModel.create(req.body.form, (err, formObject)=>{
+                    //Before creating a db entry filename of uploaded file needs to be entered in requestObject
+                    const requestObject = req.body;
+                    var uploadArray = [];
+                    for(var i=0; i<req.files.length; i++)
+                    {
+                        uploadArray.push(req.files[i].filename);
+                    }
+                    requestObject.uploads = uploadArray;
+                    
+                    FormModel.create(requestObject, (err, formObject)=>{
                         if(err)
                         {
                             res.status(400).send("Bad Request");
@@ -113,9 +122,9 @@ getAllForms = function(expressInstance, jwtInstance, verifyToken)
 }
 
 //CRUD operations at one place
-exports.createsRoutes = function(expressInstance, jwtInstance, verifyToken)
+exports.createsRoutes = function(expressInstance, jwtInstance, multerInstance, verifyToken)
 {
-    addForm(expressInstance);
+    addForm(expressInstance, multerInstance);
     getFormById(expressInstance, jwtInstance, verifyToken);
     getAllForms(expressInstance, jwtInstance, verifyToken);
 }
