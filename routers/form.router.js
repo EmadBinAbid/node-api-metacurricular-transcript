@@ -7,6 +7,7 @@
 
 //Dependencies
 const fs = require('fs');
+const archiver = require('archiver');
 
 const config = require('../config');
 const formModel = require('../models/form.model');
@@ -85,18 +86,6 @@ getUploadsById = function(expressInstance, jwtInstance, verifyToken)
                     else
                     {
                         res.json({ "form": { "uploads": formObject.uploads } });
-                        
-                        /*var file = fs.createReadStream('./public/uploads/Project proposal & Facts, Emad Bin Abid, ea02893, 2018.pdf_1531500497136.pdf');
-                        var stat = fs.statSync('./public/uploads/Project proposal & Facts, Emad Bin Abid, ea02893, 2018.pdf_1531500497136.pdf');
-                        res.setHeader('Content-Length', stat.size);
-                        res.setHeader('Content-Type', 'application/pdf');
-                        //res.setHeader('Content-Disposition', 'attachment; filename=quote.pdf');
-                        file.pipe(res);*/
-                        
-                        // var img = fs.readFileSync('./public/uploads/ea02893_StudentLeadership.png_1531499163729.png');
-                        // res.writeHead(200, { 'Content-Type': 'image/png' });
-                        // res.end(img, 'binary');
-                        
                     }
                 });
             }
@@ -138,7 +127,6 @@ viewUploadById = function(expressInstance, jwtInstance, verifyToken)
     });
 }
 
-
 /*
 method: downloadUploadById(expressInstance, jwtInstance, verifyToken)
 url: domain/form/upload/download?studentId=&filename=
@@ -174,6 +162,57 @@ downloadUploadById = function(expressInstance, jwtInstance, verifyToken)
                         // res.writeHead(200, { 'Content-Type': 'image/png' });
                         // res.end(img, 'binary');
                         
+                    }
+                });
+            }
+        });
+    });
+}
+
+/*
+method: downloadAllUploadsById(expressInstance, jwtInstance, verifyToken)
+url: domain/form/uploads/download?studentId
+request object: a query string with key=studentId
+response object: sends a download version of zipped file containing all uploads of a student
+*/
+downloadAllUploadsById = function(expressInstance, jwtInstance, verifyToken)
+{
+    expressInstance.get('/form/uploads/download', verifyToken, (req, res) => {
+        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
+            if(err)
+            {
+                res.status(401).send("Unauthorized");
+            }
+            else
+            {
+                FormModel.findOne({ "studentId": req.query.studentId }, (err, formObject)=> {
+                    if(err)
+                    {
+                        res.status(400).send("Bad Request");
+                    }
+                    else
+                    {
+                        const archive = archiver('zip');
+
+                        const filename = `${req.query.studentId}.zip`;
+                        const uploadedFilesArray = formObject.uploads;
+                        var files = [];
+
+                        for(var i=0; i<uploadedFilesArray.length; i++)
+                        {
+                            files.push(`./public/uploads/${uploadedFilesArray[i]}`);
+                        }
+
+                        res.attachment(filename);
+                        archive.pipe(res);
+
+                        console.log("Hereetetet");
+
+                        for(const i in files)
+                        {
+                            archive.file(files[i], { name: files[i] });
+                        }
+                        archive.finalize();
                     }
                 });
             }
@@ -250,6 +289,7 @@ exports.createsRoutes = function(expressInstance, jwtInstance, multerInstance, v
     getUploadsById(expressInstance, jwtInstance, verifyToken);
     viewUploadById(expressInstance, jwtInstance, verifyToken);
     downloadUploadById(expressInstance, jwtInstance, verifyToken);
+    downloadAllUploadsById(expressInstance, jwtInstance, verifyToken);
     getFormById(expressInstance, jwtInstance, verifyToken);
     getAllForms(expressInstance, jwtInstance, verifyToken);
 }
