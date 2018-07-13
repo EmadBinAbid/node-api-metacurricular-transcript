@@ -6,6 +6,8 @@
 //Establishing the routes for form model
 
 //Dependencies
+const fs = require('fs');
+
 const config = require('../config');
 const formModel = require('../models/form.model');
 
@@ -56,6 +58,50 @@ addForm = function(expressInstance, multerInstance)
                 }
             }
         } );
+    });
+}
+
+/*
+method: getUploadsById(expressInstance, jwtInstance, verifyToken)
+url: domain/form/uploads?studentId
+request object: a query string with key=studentId
+response object: sends anfjfgjfgjfgmh hfnjfj object of type { "form": Object }
+*/
+getUploadsById = function(expressInstance, jwtInstance, verifyToken)
+{
+    expressInstance.get('/form/uploads', verifyToken, (req, res) => {
+        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
+            if(err)
+            {
+                res.status(401).send("Unauthorized");
+            }
+            else
+            {
+                FormModel.findOne({ "studentId": req.query.studentId }, (err, formObject)=> {
+                    if(err)
+                    {
+                        res.status(400).send("Bad Request");
+                    }
+                    else
+                    {
+                        res.json({ "form": { "uploads": formObject.uploads } });
+
+                        
+                        /*var file = fs.createReadStream('./public/uploads/Project proposal & Facts, Emad Bin Abid, ea02893, 2018.pdf_1531500497136.pdf');
+                        var stat = fs.statSync('./public/uploads/Project proposal & Facts, Emad Bin Abid, ea02893, 2018.pdf_1531500497136.pdf');
+                        res.setHeader('Content-Length', stat.size);
+                        res.setHeader('Content-Type', 'application/pdf');
+                        //res.setHeader('Content-Disposition', 'attachment; filename=quote.pdf');
+                        file.pipe(res);*/
+                        
+                        // var img = fs.readFileSync('./public/uploads/ea02893_StudentLeadership.png_1531499163729.png');
+                        // res.writeHead(200, { 'Content-Type': 'image/png' });
+                        // res.end(img, 'binary');
+                        
+                    }
+                });
+            }
+        });
     });
 }
 
@@ -125,6 +171,7 @@ getAllForms = function(expressInstance, jwtInstance, verifyToken)
 exports.createsRoutes = function(expressInstance, jwtInstance, multerInstance, verifyToken)
 {
     addForm(expressInstance, multerInstance);
+    getUploadsById(expressInstance, jwtInstance, verifyToken);
     getFormById(expressInstance, jwtInstance, verifyToken);
     getAllForms(expressInstance, jwtInstance, verifyToken);
 }

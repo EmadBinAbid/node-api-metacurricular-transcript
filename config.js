@@ -25,7 +25,8 @@ const multerConfig = exports.multerConfig = {
         {
             next();
         }
-        const uploadedFile = file.mimetype.startsWith('image/');
+        // const uploadedFile = file.mimetype.startsWith('image/');
+        const uploadedFile = true;
         if(uploadedFile)
         {
             next(null, true);
