@@ -141,9 +141,9 @@ viewUploadById = function(expressInstance, jwtInstance, verifyToken)
 
 /*
 method: downloadUploadById(expressInstance, jwtInstance, verifyToken)
-url: domain/form/upload/download?studentId
-request object: a query string with key=studentId
-response object: sends anfjfgjfgjfgmh hfnjfj object of type { "form": Object }
+url: domain/form/upload/download?studentId=&filename=
+request object: a query string with key=studentId and key=filename
+response object: sends a download version of file after fetching it from directory
 */
 downloadUploadById = function(expressInstance, jwtInstance, verifyToken)
 {
@@ -162,15 +162,13 @@ downloadUploadById = function(expressInstance, jwtInstance, verifyToken)
                     }
                     else
                     {
-                        res.json({ "form": { "uploads": formObject.uploads } });
+                        const requestFilename = req.query.filename;
 
-                        
-                        /*var file = fs.createReadStream('./public/uploads/Project proposal & Facts, Emad Bin Abid, ea02893, 2018.pdf_1531500497136.pdf');
-                        var stat = fs.statSync('./public/uploads/Project proposal & Facts, Emad Bin Abid, ea02893, 2018.pdf_1531500497136.pdf');
+                        var file = fs.createReadStream(`./public/uploads/${requestFilename}`);
+                        var stat = fs.statSync(`./public/uploads/${requestFilename}`);
                         res.setHeader('Content-Length', stat.size);
                         res.setHeader('Content-Type', 'application/pdf');
-                        //res.setHeader('Content-Disposition', 'attachment; filename=quote.pdf');
-                        file.pipe(res);*/
+                        file.pipe(res);
                         
                         // var img = fs.readFileSync('./public/uploads/ea02893_StudentLeadership.png_1531499163729.png');
                         // res.writeHead(200, { 'Content-Type': 'image/png' });
