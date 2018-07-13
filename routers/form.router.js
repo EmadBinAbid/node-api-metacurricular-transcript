@@ -65,11 +65,89 @@ addForm = function(expressInstance, multerInstance)
 method: getUploadsById(expressInstance, jwtInstance, verifyToken)
 url: domain/form/uploads?studentId
 request object: a query string with key=studentId
-response object: sends anfjfgjfgjfgmh hfnjfj object of type { "form": Object }
+response object: sends an object of type { "form": { "uploads": Object } }
 */
 getUploadsById = function(expressInstance, jwtInstance, verifyToken)
 {
     expressInstance.get('/form/uploads', verifyToken, (req, res) => {
+        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
+            if(err)
+            {
+                res.status(401).send("Unauthorized");
+            }
+            else
+            {
+                FormModel.findOne({ "studentId": req.query.studentId }, (err, formObject)=> {
+                    if(err)
+                    {
+                        res.status(400).send("Bad Request");
+                    }
+                    else
+                    {
+                        res.json({ "form": { "uploads": formObject.uploads } });
+                        
+                        /*var file = fs.createReadStream('./public/uploads/Project proposal & Facts, Emad Bin Abid, ea02893, 2018.pdf_1531500497136.pdf');
+                        var stat = fs.statSync('./public/uploads/Project proposal & Facts, Emad Bin Abid, ea02893, 2018.pdf_1531500497136.pdf');
+                        res.setHeader('Content-Length', stat.size);
+                        res.setHeader('Content-Type', 'application/pdf');
+                        //res.setHeader('Content-Disposition', 'attachment; filename=quote.pdf');
+                        file.pipe(res);*/
+                        
+                        // var img = fs.readFileSync('./public/uploads/ea02893_StudentLeadership.png_1531499163729.png');
+                        // res.writeHead(200, { 'Content-Type': 'image/png' });
+                        // res.end(img, 'binary');
+                        
+                    }
+                });
+            }
+        });
+    });
+}
+
+/*
+method: viewUploadById(expressInstance, jwtInstance, verifyToken)
+url: domain/form/upload/view?studentId=&filename=
+request object: two query strings with key=studentId and key=filename
+response object: sends a file after fetching it from directory
+*/
+viewUploadById = function(expressInstance, jwtInstance, verifyToken)
+{
+    expressInstance.get('/form/upload/view', verifyToken, (req, res) => {
+        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
+            if(err)
+            {
+                res.status(401).send("Unauthorized");
+            }
+            else
+            {
+                FormModel.findOne({ "studentId": req.query.studentId }, (err, formObject)=> {
+                    if(err)
+                    {
+                        res.status(400).send("Bad Request");
+                    }
+                    else
+                    {
+                        const requestFilename = req.query.filename;
+                        var data = fs.readFileSync(`./public/uploads/${requestFilename}`);
+                        res.contentType("application/pdf");
+                        res.send(data);
+                    }
+                });
+            }
+        });
+    });
+}
+
+
+/*
+method: downloadUploadById(expressInstance, jwtInstance, verifyToken)
+url: domain/form/upload/download?studentId
+request object: a query string with key=studentId
+response object: sends anfjfgjfgjfgmh hfnjfj object of type { "form": Object }
+*/
+downloadUploadById = function(expressInstance, jwtInstance, verifyToken)
+{
+    expressInstance.get('/form/upload/download', verifyToken, (req, res) => {
         jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
             if(err)
             {
@@ -172,6 +250,8 @@ exports.createsRoutes = function(expressInstance, jwtInstance, multerInstance, v
 {
     addForm(expressInstance, multerInstance);
     getUploadsById(expressInstance, jwtInstance, verifyToken);
+    viewUploadById(expressInstance, jwtInstance, verifyToken);
+    downloadUploadById(expressInstance, jwtInstance, verifyToken);
     getFormById(expressInstance, jwtInstance, verifyToken);
     getAllForms(expressInstance, jwtInstance, verifyToken);
 }
