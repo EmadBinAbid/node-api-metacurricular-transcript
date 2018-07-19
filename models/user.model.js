@@ -11,16 +11,12 @@ const userSchema = mongoose.Schema(
     {
         //userId --> auto-generated
 
-        firstName: 
-        { type: String, required: true },
-        lastName: 
-        { type: String, required: true },
-        habibId:
-        { type: String, required: true },
-        email:
-        { type: String, required: true },
-        password:
-        { type: String, required: true }
+        firstName: { type: String, required: true },
+        lastName: { type: String, required: true },
+        habibId: { type: String, required: true },
+        email: { type: String, required: true },
+        password: { type: String, required: true },
+        userType: { type: String, required: true }  //userType can be 'student', 'administrator' or 'supervisor'.
     }
 );
 

@@ -16,7 +16,6 @@ method: addUser(expressInstance)
 url: domain/user
 response type: sends a json object of type { "user": object } if it doesn't exist already. Else sends "Unauthorized"
 */
-// NOT NEEDED CURRENTLY
 addUser = function(expressInstance)
 {
     expressInstance.post('/user', (req, res) => {
@@ -32,18 +31,28 @@ addUser = function(expressInstance)
             {
                 if(userObject === null)
                 {
+                    console.log(userObject);
                     //Adding User if it doesn't exist.
-                    UserModel.create(req.body.user, (err, userObject) => 
+                    if(req.body.user.userType === 'student' || req.body.user.userType === 'administrator' ||
+                    req.body.user.userType === 'supervisor')
                     {
-                        if(err)
+                        UserModel.create(req.body.user, (err, userObject) => 
                         {
-                            res.status(400).send("Bad Request");
-                        }
-                        else
-                        {
-                            res.json( { "user": userObject } );
-                        }
-                    });
+                            if(err)
+                            {
+                                console.log("EMMMMMAAAAAAAAAAAAADDDDDDDDDD");
+                                res.status(400).send("Bad Request");
+                            }
+                            else
+                            {
+                                res.json( { "user": userObject } );
+                            }
+                        });
+                    }
+                    else
+                    {
+                        res.status(400).send("Bad Request");
+                    }
                 }
                 else
                 {
@@ -51,51 +60,6 @@ addUser = function(expressInstance)
                 }
             }
         });
-    });
-}
-
-/*
-method: updateUser(expressInstance)
-url: domain/user
-request type: expects a json object of type { "user": object }
-response type: sends a json object of type { "user": object } if it exists. Else sends { "user": null }
-*/
-// NOT NEEDED CURRENTLY
-updateUser = function (expressInstance, jwtInstance, verifyToken) 
-{
-    expressInstance.put('/user', verifyToken, (req, res) => 
-    {
-        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
-            if(err)
-            {
-                res.status(401).send("Unauthorized");
-            }
-            else
-            {
-                const query = { username: userData.user.username };
-                const options = { new: true };
-
-                UserModel.findOneAndUpdate(query, req.body.user, options, (err, dbObject) => {
-                    if(err)
-                    {
-                        res.status(400).send("Bad request");
-                    }
-                    else
-                    {
-                        res.json({ "user": dbObject });
-                    }
-                });
-            }
-        });
-    });
-}
-
-//deleteUser
-// NOT NEEDED CURRENTLY
-deleteUser = function(expressInstance, jwtInstance, verifyToken)
-{
-    expressInstance.delete('/user', (req, res) => {
-        //Needs implementation
     });
 }
 
@@ -146,6 +110,7 @@ getAllUsers = function(expressInstance)
 //CRUD operations at one place
 exports.createRoutes = function(expressInstance, jwtInstance, verifyToken)
 {
+    addUser(expressInstance);
     getUser(expressInstance);
     getAllUsers(expressInstance);
 }
