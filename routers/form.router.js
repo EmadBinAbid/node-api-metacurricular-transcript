@@ -68,7 +68,7 @@ url: domain/form/uploads?studentId
 request object: a query string with key=studentId
 response object: sends an object of type { "form": { "uploads": Object } }
 */
-getUploadsById = function(expressInstance, jwtInstance, verifyToken)
+getUploadsByStudentId = function(expressInstance, jwtInstance, verifyToken)
 {
     expressInstance.get('/form/uploads', verifyToken, (req, res) => {
         jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
@@ -99,7 +99,7 @@ url: domain/form/upload/view?studentId=&filename=
 request object: two query strings with key=studentId and key=filename
 response object: sends a file after fetching it from directory
 */
-viewUploadById = function(expressInstance, jwtInstance, verifyToken)
+viewUploadByStudentId = function(expressInstance, jwtInstance, verifyToken)
 {
     expressInstance.get('/form/upload/view', verifyToken, (req, res) => {
         jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
@@ -128,12 +128,12 @@ viewUploadById = function(expressInstance, jwtInstance, verifyToken)
 }
 
 /*
-method: downloadUploadById(expressInstance, jwtInstance, verifyToken)
+method: downloadUploadByStudentId(expressInstance, jwtInstance, verifyToken)
 url: domain/form/upload/download?studentId=&filename=
 request object: a query string with key=studentId and key=filename
 response object: sends a download version of file after fetching it from directory
 */
-downloadUploadById = function(expressInstance, jwtInstance, verifyToken)
+downloadUploadByStudentId = function(expressInstance, jwtInstance, verifyToken)
 {
     expressInstance.get('/form/upload/download', verifyToken, (req, res) => {
         jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
@@ -170,12 +170,12 @@ downloadUploadById = function(expressInstance, jwtInstance, verifyToken)
 }
 
 /*
-method: downloadAllUploadsById(expressInstance, jwtInstance, verifyToken)
+method: downloadAllUploadsByStudentId(expressInstance, jwtInstance, verifyToken)
 url: domain/form/uploads/download?studentId
 request object: a query string with key=studentId
 response object: sends a download version of zipped file containing all uploads of a student
 */
-downloadAllUploadsById = function(expressInstance, jwtInstance, verifyToken)
+downloadAllUploadsByStudentId = function(expressInstance, jwtInstance, verifyToken)
 {
     expressInstance.get('/form/uploads/download', verifyToken, (req, res) => {
         jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
@@ -221,12 +221,12 @@ downloadAllUploadsById = function(expressInstance, jwtInstance, verifyToken)
 }
 
 /*
-method: getFormById(expressInstance, jwtInstance, verifyToken)
+method: getFormByStudentId(expressInstance, jwtInstance, verifyToken)
 url: domain/form?studentId
 request object: a query string with key=studentId
 response object: sends an object of type { "form": Object }
 */
-getFormById = function(expressInstance, jwtInstance, verifyToken)
+getFormByStudentId = function(expressInstance, jwtInstance, verifyToken)
 {
     expressInstance.get('/form', verifyToken, (req, res) => {
         jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
@@ -286,10 +286,10 @@ getAllForms = function(expressInstance, jwtInstance, verifyToken)
 exports.createsRoutes = function(expressInstance, jwtInstance, multerInstance, verifyToken)
 {
     addForm(expressInstance, multerInstance);
-    getUploadsById(expressInstance, jwtInstance, verifyToken);
-    viewUploadById(expressInstance, jwtInstance, verifyToken);
-    downloadUploadById(expressInstance, jwtInstance, verifyToken);
-    downloadAllUploadsById(expressInstance, jwtInstance, verifyToken);
-    getFormById(expressInstance, jwtInstance, verifyToken);
+    getUploadsByStudentId(expressInstance, jwtInstance, verifyToken);
+    viewUploadByStudentId(expressInstance, jwtInstance, verifyToken);
+    downloadUploadByStudentId(expressInstance, jwtInstance, verifyToken);
+    downloadAllUploadsByStudentId(expressInstance, jwtInstance, verifyToken);
+    getFormByStudentId(expressInstance, jwtInstance, verifyToken);
     getAllForms(expressInstance, jwtInstance, verifyToken);
 }
