@@ -8,6 +8,7 @@
 //Dependencies
 const fs = require('fs');
 const archiver = require('archiver');
+const util = require('util');
 
 const config = require('../config');
 const formModel = require('../models/form.model');
@@ -33,6 +34,8 @@ addForm = function(expressInstance, multerInstance)
             {
                 if(formObject === null)
                 {
+
+
                     //Before creating a db entry filename of uploaded file needs to be entered in requestObject
                     const requestObject = req.body;
                     var uploadArray = [];
@@ -41,8 +44,9 @@ addForm = function(expressInstance, multerInstance)
                         uploadArray.push(req.files[i].filename);
                     }
                     requestObject.uploads = uploadArray;
-                    
-                    FormModel.create(requestObject, (err, formObject)=>{
+
+                    FormModel.create(requestObject, (err, formObject)=>
+                    {
                         if(err)
                         {
                             res.status(400).send("Bad Request");
@@ -59,6 +63,51 @@ addForm = function(expressInstance, multerInstance)
                 }
             }
         } );
+    });
+}
+
+/*
+method: changeApprovedStatus(expressInstance, jwtInstance, verifyToken)
+url: domain/form/supervisor
+request object: expects an object of type { "form": { studentId=, isApproved=, categoryName=, _id= } }
+response object: sends an object of type { "form": Object }.
+*/
+changeApprovedStatus = function(expressInstance, jwtInstance, verifyToken)
+{
+    expressInstance.put('/form/supervisor', verifyToken, (req, res) => 
+    {
+        jwtInstance.verify(req.token, config.jwt_key, (err, userObject) => 
+        {
+            if(err)
+            {
+                res.status(401).send("Unauthorized");
+            }
+            else
+            {
+                const query = { 
+                    studentId: req.body.form.studentId,
+                    [req.body.form.categoryName]: { $elemMatch: { _id: req.body.form._id } }
+                };
+
+                const update = {
+                    '$set': { [util.format("%s.$.isApproved", req.body.form.categoryName)] : req.body.form.isApproved }
+                };
+
+                console.log(update);
+                FormModel.findOneAndUpdate(query, update, {new: true} , (err, formObject) => 
+                {
+                    //console.log(formObject);
+                    if(err)
+                    {
+                        res.status(400).send("Bad Request");
+                    }
+                    else
+                    {
+                        res.json({ "form": formObject });
+                    }
+                });
+            }
+        });
     });
 }
 
@@ -286,6 +335,7 @@ getAllForms = function(expressInstance, jwtInstance, verifyToken)
 exports.createsRoutes = function(expressInstance, jwtInstance, multerInstance, verifyToken)
 {
     addForm(expressInstance, multerInstance);
+    changeApprovedStatus(expressInstance, jwtInstance, verifyToken);
     getUploadsByStudentId(expressInstance, jwtInstance, verifyToken);
     viewUploadByStudentId(expressInstance, jwtInstance, verifyToken);
     downloadUploadByStudentId(expressInstance, jwtInstance, verifyToken);
