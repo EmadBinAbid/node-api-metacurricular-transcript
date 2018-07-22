@@ -168,8 +168,8 @@ getUploadsByStudentId = function(expressInstance, jwtInstance, verifyToken)
 
 /*
 method: getFormCategoriesBySupervisorId(expressInstance, jwtInstance, verifyToken)
-url: domain/form/categories?supervisorId=
-request object: a query string with key=supervisorId
+url: domain/form/categories
+request object: none
 response object: sends an object of type ....
 */
 getFormCategoriesBySupervisorId = function(expressInstance, jwtInstance, verifyToken)
@@ -199,7 +199,12 @@ getFormCategoriesBySupervisorId = function(expressInstance, jwtInstance, verifyT
                                 var formObjectArray = formObject;
                                 for(var j=0; j<formObjectArray.length; j++)
                                 {
-                                    var responseArrayObject = { "studentID": formObjectArray[j].studentID };
+                                    var responseArrayObject = { 
+                                        "studentID": formObjectArray[j].studentID,
+                                        "firstName": formObjectArray[j].firstName,
+                                        "lastName": formObjectArray[j].lastName,
+                                        "major": formObjectArray[j].major
+                                    };
                                     for(var i=0; i<categoryArray.length; i++)
                                     {
                                         responseArrayObject[categoryArray[i].keyName] = [];
