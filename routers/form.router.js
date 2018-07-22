@@ -23,9 +23,9 @@ response object: sends an object of type { "form": Object } if it doesn't exist 
 */
 addForm = function(expressInstance, multerInstance)
 {
-    expressInstance.post('/form', multerInstance(config.multerConfig).array('upload', 2), (req, res) => {
+    expressInstance.post('/form', multerInstance(config.multerConfig).array('upload', 20), (req, res) => {
         //If form of particular studentId exists, then don't add the form.
-        FormModel.findOne( { "studentId": req.body.studentId }, (err, formObject)=>{
+        FormModel.findOne( { "studentID": req.body.studentID }, (err, formObject)=>{
             if(err)
             {
                 res.status(400).send("Bad Request");
@@ -34,21 +34,43 @@ addForm = function(expressInstance, multerInstance)
             {
                 if(formObject === null)
                 {
-
-
                     //Before creating a db entry filename of uploaded file needs to be entered in requestObject
-                    const requestObject = req.body;
+                    
                     var uploadArray = [];
+                    var tempArray = [];
                     for(var i=0; i<req.files.length; i++)
                     {
                         uploadArray.push(req.files[i].filename);
+                        tempArray.push(req.files[i].filename.split('.')[0]);
                     }
-                    requestObject.uploads = uploadArray;
+                    //requestObject.uploads = uploadArray;
+                    
+                    Object.keys(req.body).forEach(function(key)
+                    {
+                        if(key.toLowerCase().includes('category'))
+                        {
+                            //ea02893_leadershipCategory_0
+                            for(var i=0; i<req.body[key].length; i++)
+                            {
+                                var validIndex = tempArray.indexOf(req.body.studentID + '_' + key + '_' + i.toString());
+                                if( validIndex != -1)
+                                {
+                                    req.body[key][i].fileUpload = uploadArray[validIndex];
+                                }
+                                else
+                                {
+                                    console.log(uploadArray);
+                                }
+                            }
+                        }
+                    });
 
+                    const requestObject = req.body;
                     FormModel.create(requestObject, (err, formObject)=>
                     {
                         if(err)
                         {
+                            console.log(err);
                             res.status(400).send("Bad Request");
                         }
                         else

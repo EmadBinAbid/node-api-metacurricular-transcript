@@ -20,7 +20,7 @@ exports.validateUser = function(expressInstance, jwtInstance)
 {
     //Validating User
     expressInstance.post('/login', (req, res) => {
-        UserModel.findOne({ "habibId": req.body.user.habibId, "password": req.body.user.password}, (err, userObject) => {
+        UserModel.findOne({ "email": req.body.user.email, "password": req.body.user.password}, (err, userObject) => {
             if (err) 
             {
                 res.status(401).send('Unauthorized');

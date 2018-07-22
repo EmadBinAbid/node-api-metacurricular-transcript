@@ -15,7 +15,7 @@ const multerConfig = exports.multerConfig = {
             filename: function(req, file, next)
             {
                 const ext = file.mimetype.split('/')[1];
-                next(null, file.originalname + '_' + Date.now() + '.' + ext);
+                next(null, file.originalname/* + '_' + Date.now() + '.' + ext*/);
             }
         }
     ),

@@ -11,9 +11,10 @@ const categorySchema = mongoose.Schema(
     {
         //categoryId --> auto-generated
         
-        categoryName: { type: String, required: true },
+        name: { type: String, required: true },
+        keyName: { type: String, required: true },
         supervisorHabibId: { type: String, required: true },
-
+        types: [ { name: String, keyName: String } ]
     }
 );
 
