@@ -225,7 +225,7 @@ getFormCategoriesBySupervisorId = function(expressInstance, jwtInstance, verifyT
 
 /*
 method: viewUploadById(expressInstance, jwtInstance, verifyToken)
-url: domain/form/upload/view?studentId=&filename=
+url: domain/form/upload/view?studentID=&filename=
 request object: two query strings with key=studentId and key=filename
 response object: sends a file after fetching it from directory
 */
@@ -239,16 +239,17 @@ viewUploadByStudentId = function(expressInstance, jwtInstance, verifyToken)
             }
             else
             {
-                FormModel.findOne({ "studentId": req.query.studentId }, (err, formObject)=> {
+                FormModel.findOne({ "studentID": req.query.studentID }, (err, formObject)=> {
                     if(err)
                     {
                         res.status(400).send("Bad Request");
                     }
                     else
                     {
+                        console.log(req.query.filename);
                         const requestFilename = req.query.filename;
                         var data = fs.readFileSync(`./public/uploads/${requestFilename}`);
-                        res.contentType("application/pdf");
+                        res.setHeader('Content-Type', 'application/pdf');
                         res.send(data);
                     }
                 });
@@ -265,37 +266,52 @@ response object: sends a download version of file after fetching it from directo
 */
 downloadUploadByStudentId = function(expressInstance, jwtInstance, verifyToken)
 {
-    expressInstance.get('/form/upload/download', verifyToken, (req, res) => {
-        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
+    expressInstance.get('/form/upload/download'/*, verifyToken*/, (req, res) => {
+        /*jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
             if(err)
             {
                 res.status(401).send("Unauthorized");
             }
             else
-            {
-                FormModel.findOne({ "studentId": req.query.studentId }, (err, formObject)=> {
+            {*/
+                FormModel.findOne({ "studentID": req.query.studentID }, (err, formObject)=> {
                     if(err)
                     {
                         res.status(400).send("Bad Request");
                     }
                     else
                     {
-                        const requestFilename = req.query.filename;
+                        var requestFilename = req.query.filename;
+                        var isFileFound = false;
+                        console.log(requestFilename);
 
-                        var file = fs.createReadStream(`./public/uploads/${requestFilename}`);
-                        var stat = fs.statSync(`./public/uploads/${requestFilename}`);
-                        res.setHeader('Content-Length', stat.size);
-                        res.setHeader('Content-Type', 'application/pdf');
-                        file.pipe(res);
-                        
-                        // var img = fs.readFileSync('./public/uploads/ea02893_StudentLeadership.png_1531499163729.png');
-                        // res.writeHead(200, { 'Content-Type': 'image/png' });
-                        // res.end(img, 'binary');
-                        
+                        fs.readdir('./public/uploads', (err, files) => {
+                            files.forEach(file => {
+                                if(file.includes(requestFilename))
+                                {
+                                    requestFilename = file;
+                                    isFileFound = true;
+                                }
+                            });
+                            if(isFileFound)
+                            {
+                                var file = fs.createReadStream(`./public/uploads/${requestFilename}`);
+                                var stat = fs.statSync(`./public/uploads/${requestFilename}`);
+                                res.setHeader('Content-Length', stat.size);
+                                res.setHeader('Content-Type', 'application/pdf');
+                                file.pipe(res);
+
+                                // var img = fs.readFileSync('./public/uploads/ea02893_StudentLeadership.png_1531499163729.png');
+                                // res.writeHead(200, { 'Content-Type': 'image/png' });
+                                // res.end(img, 'binary');
+                            }
+                            else
+                                res.send("No attachment found!");
+                        });
                     }
                 });
-            }
-        });
+            /*}
+        });*/
     });
 }
 
