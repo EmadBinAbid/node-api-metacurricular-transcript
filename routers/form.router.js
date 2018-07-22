@@ -12,8 +12,10 @@ const util = require('util');
 
 const config = require('../config');
 const formModel = require('../models/form.model');
+const categoryModel = require('../models/category.model');
 
 const FormModel = formModel.FormModel;
+const CategoryModel = categoryModel.CategoryModel;
 
 /*
 method: addForm(expressInstance, multerInstance)
@@ -157,6 +159,58 @@ getUploadsByStudentId = function(expressInstance, jwtInstance, verifyToken)
                     else
                     {
                         res.json({ "form": { "uploads": formObject.uploads } });
+                    }
+                });
+            }
+        });
+    });
+}
+
+/*
+method: getFormCategoriesBySupervisorId(expressInstance, jwtInstance, verifyToken)
+url: domain/form/categories?supervisorId=
+request object: a query string with key=supervisorId
+response object: sends an object of type ....
+*/
+getFormCategoriesBySupervisorId = function(expressInstance, jwtInstance, verifyToken)
+{
+    expressInstance.get('/form/categories', verifyToken, (req, res) => {
+        jwtInstance.verify(req.token, config.jwt_key, (err, userData) => {
+            if(err)
+                res.status(401).send("Unauthorized");
+            else
+            {
+                CategoryModel.find({ "supervisorHabibId": userData.user.habibId }, (err, categoryObject) => 
+                {
+                    if(err)
+                        res.status(401).send("Unauthorized");
+                    else
+                    {
+                        var categoryArray = categoryObject;
+                        var responseArray = [];
+
+                        FormModel.find( (err, formObject) => {
+                            if(err)
+                                res.status(400).send("Bad Request");
+                            else
+                            {
+                                //console.log(categoryArray);
+
+                                var formObjectArray = formObject;
+                                for(var j=0; j<formObjectArray.length; j++)
+                                {
+                                    var responseArrayObject = { "studentID": formObjectArray[j].studentID };
+                                    for(var i=0; i<categoryArray.length; i++)
+                                    {
+                                        responseArrayObject[categoryArray[i].keyName] = [];
+                                        console.log(categoryArray[i]);
+                                        responseArrayObject[categoryArray[i].keyName] = formObject[j][categoryArray[i].keyName];
+                                    }
+                                    responseArray.push(responseArrayObject);
+                                }
+                                res.json(responseArray);
+                            }
+                        } );
                     }
                 });
             }
@@ -359,6 +413,7 @@ exports.createsRoutes = function(expressInstance, jwtInstance, multerInstance, v
     addForm(expressInstance, multerInstance);
     changeApprovedStatus(expressInstance, jwtInstance, verifyToken);
     getUploadsByStudentId(expressInstance, jwtInstance, verifyToken);
+    getFormCategoriesBySupervisorId(expressInstance, jwtInstance, verifyToken);
     viewUploadByStudentId(expressInstance, jwtInstance, verifyToken);
     downloadUploadByStudentId(expressInstance, jwtInstance, verifyToken);
     downloadAllUploadsByStudentId(expressInstance, jwtInstance, verifyToken);
