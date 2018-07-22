@@ -109,7 +109,7 @@ changeApprovedStatus = function(expressInstance, jwtInstance, verifyToken)
             else
             {
                 const query = { 
-                    studentId: req.body.form.studentId,
+                    studentID: req.body.form.studentID,
                     [req.body.form.categoryName]: { $elemMatch: { _id: req.body.form._id } }
                 };
 
