@@ -203,7 +203,8 @@ getFormCategoriesBySupervisorId = function(expressInstance, jwtInstance, verifyT
                                         "studentID": formObjectArray[j].studentID,
                                         "firstName": formObjectArray[j].firstName,
                                         "lastName": formObjectArray[j].lastName,
-                                        "major": formObjectArray[j].major
+                                        "major": formObjectArray[j].major,
+                                        "school": formObjectArray[j].school
                                     };
                                     for(var i=0; i<categoryArray.length; i++)
                                     {
