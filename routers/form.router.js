@@ -72,7 +72,7 @@ addForm = function(expressInstance, multerInstance)
                     {
                         if(err)
                         {
-                            console.log(err);
+                            console.log(requestObject);
                             res.status(400).send("Bad Request");
                         }
                         else
